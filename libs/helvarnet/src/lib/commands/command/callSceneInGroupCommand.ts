@@ -4,6 +4,14 @@ import { Duration } from '../../value-objects/duration';
 import { HelvarNetCommand } from '../helvarNetCommand';
 
 export class CallSceneInGroupCommand extends HelvarNetCommand {
+  static isApplicableTo(
+    command: HelvarNetCommand
+  ): command is CallSceneInGroupCommand {
+    return (
+      command.getCommandNumber() === CallSceneInGroupCommand.COMMAND_NUMBER
+    );
+  }
+
   static COMMAND_NUMBER = 11;
   public scene: LightScene;
   public group: LightGroupNumber;
@@ -45,7 +53,7 @@ export class CallSceneInGroupCommandBuilder {
   private fadeTime: Duration = Duration.fromSeconds(0);
 
   fromCommandParametersObject(
-    commandParametersObject: Record<string, string>,
+    commandParametersObject: Record<string, string>
   ): this {
     return this.withGroup(LightGroupNumber.of(+commandParametersObject.G))
       .withScene(LightScene.of(+commandParametersObject.S))
@@ -70,12 +78,12 @@ export class CallSceneInGroupCommandBuilder {
   build(): CallSceneInGroupCommand {
     if (!this.scene) {
       throw new Error(
-        'Cannot create a CallSceneInGroupCommand without giving a scene',
+        'Cannot create a CallSceneInGroupCommand without giving a scene'
       );
     }
     if (!this.group) {
       throw new Error(
-        'Cannot create a CallSceneInGroupCommand without giving a group',
+        'Cannot create a CallSceneInGroupCommand without giving a group'
       );
     }
 

@@ -1,10 +1,14 @@
 import {
+  CallSceneInGroupCommand,
   GetLastSceneInGroupQueryBuilder,
+  HelvarnetApiEvents,
+  HelvarNetCommand,
   LightGroupNumber,
   LightScene,
 } from '@homespace-dashboard/helvarnet';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { HelvarnetApiService } from '../helvarnet-api/helvarnet-api.service';
+import { Observable, Subject } from 'rxjs';
 
 interface GroupState {
   group: LightGroupNumber;
@@ -14,6 +18,10 @@ interface GroupState {
 @Injectable()
 export class LightGroupsService {
   constructor(private readonly helvarnetApi: HelvarnetApiService) {}
+
+  lightEvents = new Subject<GroupState>();
+  private isLightEventStreamInitialized = false;
+  private readonly logger = new Logger(LightGroupsService.name);
 
   async getGroupsStates(
     lightGroups: readonly LightGroupNumber[]
@@ -33,5 +41,31 @@ export class LightGroupsService {
       });
     }
     return result;
+  }
+
+  getLightEvents(): Observable<GroupState> {
+    if (!this.isLightEventStreamInitialized) {
+      this.isLightEventStreamInitialized = true;
+      this.initLightEventStream().then(() => {
+        this.logger.log('Helvar light events initialized');
+      });
+    }
+
+    return this.lightEvents;
+  }
+
+  private async initLightEventStream(): Promise<void> {
+    const api = await this.helvarnetApi.getApi();
+    api.controllerCommandsEventEmitter.addListener(
+      HelvarnetApiEvents.COMMAND_RECEIVED,
+      (command: HelvarNetCommand) => {
+        if (CallSceneInGroupCommand.isApplicableTo(command)) {
+          this.lightEvents.next({
+            group: command.group,
+            state: command.scene.isEqualTo(LightScene.OFF) ? 'OFF' : 'ON',
+          });
+        }
+      }
+    );
   }
 }

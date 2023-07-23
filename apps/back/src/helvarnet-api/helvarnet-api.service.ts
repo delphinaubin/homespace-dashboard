@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { HelvarnetConfig } from './helvarnet.config';
 import { HelvarNetApi } from '@homespace-dashboard/helvarnet';
 
 @Injectable()
 export class HelvarnetApiService {
+  private readonly logger = new Logger(HelvarnetApiService.name);
+
   private readonly api: HelvarNetApi;
   private isConnected = false;
   constructor(helvarnetConfig: HelvarnetConfig) {
@@ -16,6 +18,7 @@ export class HelvarnetApiService {
   }
 
   async disconnect(): Promise<void> {
+    this.logger.log('Disconnecting helvarnet api...');
     await this.api.closeConnexion();
     this.isConnected = false;
   }

@@ -5,6 +5,15 @@ import { HelvarNetCommand } from '../helvarNetCommand';
 import { BrightnessProportion } from '../../value-objects/brightnessProportion';
 
 export class CallDirectProportionInGroupCommand extends HelvarNetCommand {
+  static isApplicableTo(
+    command: HelvarNetCommand
+  ): command is CallDirectProportionInGroupCommand {
+    return (
+      command.getCommandNumber() ===
+      CallDirectProportionInGroupCommand.COMMAND_NUMBER
+    );
+  }
+
   static COMMAND_NUMBER = 15;
   public proportion: BrightnessProportion;
   public group: LightGroupNumber;
@@ -44,7 +53,7 @@ export class CallDirectProportionInGroupCommandBuilder {
   private fadeTime?: Duration;
 
   fromCommandParametersObject(
-    commandParametersObject: Record<string, string>,
+    commandParametersObject: Record<string, string>
   ): this {
     return this.withGroup(LightGroupNumber.of(+commandParametersObject.G))
       .withProportion(BrightnessProportion.of(+commandParametersObject.P))
@@ -74,12 +83,12 @@ export class CallDirectProportionInGroupCommandBuilder {
   build(): CallDirectProportionInGroupCommand {
     if (!this.proportion) {
       throw new Error(
-        'Cannot create a CallDirectProportionInGroupCommand without giving a level',
+        'Cannot create a CallDirectProportionInGroupCommand without giving a level'
       );
     }
     if (!this.group) {
       throw new Error(
-        'Cannot create a CallDirectProportionInGroupCommand without giving a group',
+        'Cannot create a CallDirectProportionInGroupCommand without giving a group'
       );
     }
 

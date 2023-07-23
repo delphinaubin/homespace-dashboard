@@ -4,6 +4,15 @@ import { BrightnessLevel } from '../../value-objects/brightnessLevel';
 import { HelvarNetCommand } from '../helvarNetCommand';
 
 export class CallDirectLevelInGroupCommand extends HelvarNetCommand {
+  static isApplicableTo(
+    command: HelvarNetCommand
+  ): command is CallDirectLevelInGroupCommand {
+    return (
+      command.getCommandNumber() ===
+      CallDirectLevelInGroupCommand.COMMAND_NUMBER
+    );
+  }
+
   static COMMAND_NUMBER = 13;
   public level: BrightnessLevel;
   public group: LightGroupNumber;
@@ -43,7 +52,7 @@ export class CallDirectLevelInGroupCommandBuilder {
   private fadeTime?: Duration;
 
   fromCommandParametersObject(
-    commandParametersObject: Record<string, string>,
+    commandParametersObject: Record<string, string>
   ): this {
     return this.withGroup(LightGroupNumber.of(+commandParametersObject.G))
       .withLevel(BrightnessLevel.of(+commandParametersObject.L))
@@ -68,12 +77,12 @@ export class CallDirectLevelInGroupCommandBuilder {
   build(): CallDirectLevelInGroupCommand {
     if (!this.level) {
       throw new Error(
-        'Cannot create a CallDirectLevelInGroupCommand without giving a level',
+        'Cannot create a CallDirectLevelInGroupCommand without giving a level'
       );
     }
     if (!this.group) {
       throw new Error(
-        'Cannot create a CallDirectLevelInGroupCommand without giving a group',
+        'Cannot create a CallDirectLevelInGroupCommand without giving a group'
       );
     }
 

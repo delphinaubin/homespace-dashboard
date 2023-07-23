@@ -8,6 +8,15 @@ interface GetGroupNameQueryConstructorParams {
 export class GetGroupNameQuery extends HelvarNetCommand {
   _TYPE?: 'GetGroupNameQuery';
 
+  static isApplicableTo(
+    command: HelvarNetCommand
+  ): command is GetGroupNameQuery {
+    return (
+      command.getCommandNumber() === GetGroupNameQuery.COMMAND_NUMBER
+    );
+  }
+
+
   static COMMAND_NUMBER = 105;
   public group: LightGroupNumber;
 

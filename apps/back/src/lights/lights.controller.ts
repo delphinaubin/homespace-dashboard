@@ -1,7 +1,15 @@
-import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  MessageEvent,
+  Sse,
+} from '@nestjs/common';
 import { LightGroupNumber } from '@homespace-dashboard/helvarnet';
 import { GroupsByName } from '../config/house-groups.config';
 import { LightGroupsService } from './light-groups.service';
+import { filter, map, Observable, of } from 'rxjs';
 
 const GROUPS_WE_WANT_TO_FOLLOW: readonly LightGroupNumber[] = [
   GroupsByName.hall,
@@ -14,6 +22,13 @@ const GROUPS_WE_WANT_TO_FOLLOW: readonly LightGroupNumber[] = [
 
 interface GroupStatesResponse {
   groups: { number: number; state: 'ON' | 'OFF' }[];
+}
+
+interface LightMessageEvent extends MessageEvent {
+  data: {
+    group: number;
+    state: 'ON' | 'OFF';
+  };
 }
 
 @Controller('/lights')
@@ -33,5 +48,22 @@ export class LightsController {
         state: g.state,
       })),
     };
+  }
+
+  @Sse('events')
+  getLightsEvents(): Observable<LightMessageEvent> {
+    return this.lightGroupsService.getLightEvents().pipe(
+      filter((lightEvent) =>
+        GROUPS_WE_WANT_TO_FOLLOW.some((groupNumber) =>
+          lightEvent.group.isEqualTo(groupNumber)
+        )
+      ),
+      map((lightEvent) => ({
+        data: {
+          group: lightEvent.group.groupNumber,
+          state: lightEvent.state,
+        },
+      }))
+    );
   }
 }

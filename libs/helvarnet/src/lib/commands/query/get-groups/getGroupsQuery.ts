@@ -3,6 +3,10 @@ import { HelvarNetCommand } from '../../helvarNetCommand';
 export class GetGroupsQuery extends HelvarNetCommand {
   _TYPE?: 'GetGroupsQuery';
 
+  static isApplicableTo(command: HelvarNetCommand): command is GetGroupsQuery {
+    return command.getCommandNumber() === GetGroupsQuery.COMMAND_NUMBER;
+  }
+
   static COMMAND_NUMBER = 165;
 
   constructor() {

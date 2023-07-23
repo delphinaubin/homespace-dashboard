@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleDestroy } from '@nestjs/common';
 import { HelvarnetConfig } from './helvarnet.config';
 import { HelvarnetApiService } from './helvarnet-api.service';
 
@@ -8,4 +8,10 @@ import { HelvarnetApiService } from './helvarnet-api.service';
   providers: [HelvarnetConfig, HelvarnetApiService],
   exports: [HelvarnetApiService],
 })
-export class HelvarnetApiModule {}
+export class HelvarnetApiModule implements OnModuleDestroy {
+  constructor(private readonly helvarnetApi: HelvarnetApiService) {}
+
+  async onModuleDestroy(): Promise<void> {
+    await this.helvarnetApi.disconnect();
+  }
+}
